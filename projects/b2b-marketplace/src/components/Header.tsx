@@ -160,10 +160,12 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
               <span>{isThai ? 'TH' : 'EN'}</span>
             </button>
 
-            <div className="hidden lg:flex items-center gap-4 mr-4 text-sm font-medium text-slate-600">
-              <span className="cursor-pointer hover:text-brand-600 transition-colors">{t('header.myLists')}</span>
-              <span className="cursor-pointer hover:text-brand-600 transition-colors">{t('header.orders')}</span>
-            </div>
+            <button 
+              onClick={() => onSearch('')}
+              className="hidden lg:flex items-center px-4 py-2 text-sm font-semibold text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-xl transition-all border border-brand-100 shadow-sm mr-4"
+            >
+              {t('header.advancedSearch')}
+            </button>
             
             <div className="relative group">
               <motion.button 
@@ -219,7 +221,7 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
             </div>
 
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-200 rounded-full border border-slate-300 overflow-hidden cursor-pointer">
-              <img src="https://ui-avatars.com/api/?name=User&background=f8fafc&color=0f172a" alt="User" />
+              <img src="/images/avatar.png" alt="User" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -249,26 +251,46 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
             {showAutocomplete && query && (
               <div className="absolute left-0 right-0 top-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-y-auto max-h-[55vh] z-50">
                 <div className="p-2">
-                  {filteredProducts.slice(0, 8).map(product => {
-                    const name = isThai ? product.nameTh : product.nameEn;
-                    return (
-                      <div 
-                        key={product.id} 
-                        className="flex items-center p-2.5 hover:bg-brand-50 rounded-xl cursor-pointer transition-colors"
-                        onClick={() => {
-                          setShowAutocomplete(false);
-                          onNavigateProduct(product.id);
-                        }}
-                      >
-                        <img src={product.image} alt={name} className="w-9 h-9 rounded-lg object-cover mr-3 flex-shrink-0" />
-                        <div className="flex-1 overflow-hidden">
-                          <h4 className="text-sm font-medium text-slate-900 truncate">{name}</h4>
-                          <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
+                    {filteredProducts.slice(0, 8).map(product => {
+                      const name = isThai ? product.nameTh : product.nameEn;
+                      return (
+                        <div key={product.id} className="relative overflow-hidden rounded-xl mb-1 last:mb-0 bg-brand-500">
+                          {/* Background revealed on swipe */}
+                          <div className="absolute inset-0 flex items-center px-4 text-white font-bold">
+                            <div className="flex items-center gap-2">
+                              <ShoppingCart className="w-5 h-5" />
+                              <span className="text-sm">{t('header.addedToCart')}</span>
+                            </div>
+                          </div>
+
+                          <motion.div 
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={0.7}
+                            onDragEnd={(_, info) => {
+                              // If swiped right enough, add to cart
+                              if (info.offset.x > 100) {
+                                addToCart(null as any, product);
+                              }
+                            }}
+                            className="relative flex items-center p-2.5 bg-white hover:bg-brand-50 cursor-pointer transition-colors border-b border-slate-50 last:border-0"
+                            onClick={(e) => {
+                              // Don't navigate if it was a drag
+                              if (Math.abs((e as any).movementX || 0) > 5) return;
+                              setShowAutocomplete(false);
+                              onNavigateProduct(product.id);
+                            }}
+                          >
+                            <img src={product.image} alt={name} className="w-9 h-9 rounded-lg object-cover mr-3 flex-shrink-0" />
+                            <div className="flex-1 overflow-hidden">
+                              <h4 className="text-sm font-medium text-slate-900 truncate">{name}</h4>
+                              <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
+                            </div>
+                            <p className="text-sm font-semibold text-brand-600 ml-2 flex-shrink-0">฿{product.price.toFixed(0)}</p>
+                          </motion.div>
                         </div>
-                        <p className="text-sm font-semibold text-brand-600 ml-2 flex-shrink-0">฿{product.price.toFixed(0)}</p>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
                 </div>
               </div>
             )}

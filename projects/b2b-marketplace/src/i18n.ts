@@ -13,7 +13,10 @@ const resources = {
         items: 'ชิ้น',
         viewCart: 'ดูตะกร้าและชำระเงิน',
         emptyCart: 'ตะกร้าของคุณว่างเปล่า',
-        brand: 'FreshMarket'
+        brand: 'FreshMarket',
+        advancedSearch: 'ค้นหาแบบละเอียด',
+        swipeToAdd: 'ปัดเพื่อเพิ่ม',
+        addedToCart: 'เพิ่มลงตะกร้าแล้ว'
       },
       landing: {
         title: 'แพลตฟอร์มจัดซื้ออาหาร B2B',
@@ -68,7 +71,10 @@ const resources = {
         items: 'items',
         viewCart: 'View Cart & Checkout',
         emptyCart: 'Your cart is empty',
-        brand: 'FreshMarket'
+        brand: 'FreshMarket',
+        advancedSearch: 'Advanced Search',
+        swipeToAdd: 'Swipe to add',
+        addedToCart: 'Added to Cart'
       },
       landing: {
         title: 'B2B Food Procurement',
