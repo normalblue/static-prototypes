@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ShoppingCart, Menu, Globe } from 'lucide-react';
+import { Search, ShoppingCart, Menu, Globe, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { MOCK_PRODUCTS } from '../data/mockData';
@@ -57,6 +57,17 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
     }
   };
 
+  const clearSearch = () => {
+    setQuery('');
+    setShowAutocomplete(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      clearSearch();
+    }
+  };
+
   const isThai = i18n.language === 'th';
   
   const toggleLanguage = () => {
@@ -104,11 +115,23 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
                     setShowAutocomplete(true);
                   }}
                   onFocus={() => setShowAutocomplete(true)}
+                  onKeyDown={handleKeyDown}
                 />
                 <Search className="absolute left-4 h-5 w-5 text-slate-400" />
-                <button type="submit" className="absolute right-2 bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors">
-                  {t('header.search')}
-                </button>
+                <div className="absolute right-2 flex items-center gap-1.5">
+                  {query && (
+                    <button 
+                      type="button" 
+                      onClick={clearSearch}
+                      className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button type="submit" className="bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-colors">
+                    {t('header.search')}
+                  </button>
+                </div>
               </form>
 
               {/* Desktop Autocomplete */}
@@ -252,11 +275,23 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
                   setShowAutocomplete(true);
                 }}
                 onFocus={() => setShowAutocomplete(true)}
+                onKeyDown={handleKeyDown}
               />
               <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
-              <button type="submit" className="absolute right-1.5 bg-brand-500 hover:bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-medium transition-colors">
-                {t('header.search')}
-              </button>
+              <div className="absolute right-1.5 flex items-center gap-1">
+                {query && (
+                  <button 
+                    type="button" 
+                    onClick={clearSearch}
+                    className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+                <button type="submit" className="w-8 h-8 bg-brand-500 hover:bg-brand-600 text-white rounded-full flex items-center justify-center transition-colors shadow-sm">
+                  <Search className="h-4 w-4" />
+                </button>
+              </div>
             </form>
 
             {/* Mobile Autocomplete Dropdown */}
