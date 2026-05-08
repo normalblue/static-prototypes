@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, ArrowRight, TrendingUp } from 'lucide-react';
 import { MOCK_PRODUCTS } from '../data/mockData';
 import { ProductCard } from './ProductCard';
+import { useTranslation } from 'react-i18next';
 
 interface LandingPageProps {
   onSearch: (query: string) => void;
@@ -12,9 +13,17 @@ export function LandingPage({ onSearch }: LandingPageProps) {
   const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t, i18n } = useTranslation();
+  
+  const isThai = i18n.language === 'th';
 
   const filteredProducts = query 
-    ? MOCK_PRODUCTS.filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase()))
+    ? MOCK_PRODUCTS.filter(p => 
+        p.nameTh.toLowerCase().includes(query.toLowerCase()) || 
+        p.nameEn.toLowerCase().includes(query.toLowerCase()) ||
+        p.categoryTh.toLowerCase().includes(query.toLowerCase()) ||
+        p.categoryEn.toLowerCase().includes(query.toLowerCase())
+      )
     : [];
 
   useEffect(() => {
@@ -35,15 +44,19 @@ export function LandingPage({ onSearch }: LandingPageProps) {
     }
   };
 
+  const popularSearches = isThai 
+    ? ['แซลมอน', 'อกไก่', 'ผักกาดออร์แกนิค', 'นม']
+    : ['Salmon', 'Chicken Breast', 'Organic Lettuce', 'Milk'];
+
   return (
     <div className="min-h-screen pt-20 flex flex-col items-center">
       {/* Hero Section */}
       <div className="w-full max-w-4xl mx-auto px-4 mt-20 text-center relative z-10">
         <h1 className="text-4xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6">
-          The smart way to source for your <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-brand-700">Kitchen</span>
+          {t('landing.title')}
         </h1>
         <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-          Over 10,000 fresh ingredients, wholesale prices, and reliable next-day delivery for restaurants and hotels.
+          {t('landing.subtitle')}
         </p>
 
         {/* Big Search Bar */}
@@ -57,7 +70,7 @@ export function LandingPage({ onSearch }: LandingPageProps) {
               ref={inputRef}
               type="text"
               className="w-full h-16 md:h-20 pl-16 pr-32 text-lg md:text-xl text-slate-900 bg-transparent outline-none rounded-2xl placeholder:text-slate-400"
-              placeholder="Search ingredients, seafood, meat..."
+              placeholder={t('header.searchPlaceholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
@@ -66,7 +79,7 @@ export function LandingPage({ onSearch }: LandingPageProps) {
               type="submit"
               className="absolute right-3 top-3 bottom-3 bg-brand-500 hover:bg-brand-600 text-white px-6 rounded-xl font-semibold text-lg transition-colors flex items-center shadow-sm"
             >
-              Search
+              {t('header.search')}
             </button>
           </form>
 
@@ -82,31 +95,34 @@ export function LandingPage({ onSearch }: LandingPageProps) {
                   <div className="md:w-1/2 p-2 border-b md:border-b-0 md:border-r border-slate-100">
                     <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">Suggestions</h3>
                     <ul>
-                      {filteredProducts.slice(0, 5).map(product => (
-                        <li key={product.id}>
-                          <button
-                            type="button"
-                            onClick={() => onSearch(product.name)}
-                            className="w-full text-left flex items-center p-3 hover:bg-brand-50 rounded-xl transition-colors group"
-                          >
-                            <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-slate-100" />
-                            <div className="ml-3 flex-1 overflow-hidden">
-                              <p className="text-sm font-medium text-slate-900 truncate group-hover:text-brand-700">{product.name}</p>
-                              <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
-                            </div>
-                            <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
-                          </button>
-                        </li>
-                      ))}
+                      {filteredProducts.slice(0, 5).map(product => {
+                        const name = isThai ? product.nameTh : product.nameEn;
+                        return (
+                          <li key={product.id}>
+                            <button
+                              type="button"
+                              onClick={() => onSearch(name)}
+                              className="w-full text-left flex items-center p-3 hover:bg-brand-50 rounded-xl transition-colors group"
+                            >
+                              <img src={product.image} alt={name} className="w-10 h-10 rounded-lg object-cover bg-slate-100" />
+                              <div className="ml-3 flex-1 overflow-hidden">
+                                <p className="text-sm font-medium text-slate-900 truncate group-hover:text-brand-700">{name}</p>
+                                <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
+                              </div>
+                              <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
+                            </button>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
 
                   {/* Section B: Visual Cards */}
                   <div className="md:w-1/2 p-4 bg-slate-50/50">
-                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Top Products</h3>
-                    <div className="flex gap-4 overflow-x-auto pb-2 snap-x scrollbar-hide">
-                      {filteredProducts.slice(0, 3).map(product => (
-                        <div key={`visual-${product.id}`} className="snap-start shrink-0">
+                    <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{t('landing.topProducts')}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
+                      {filteredProducts.slice(0, 2).map(product => (
+                        <div key={`visual-${product.id}`} className="w-full">
                           <ProductCard product={product} compact />
                         </div>
                       ))}
@@ -116,7 +132,7 @@ export function LandingPage({ onSearch }: LandingPageProps) {
               ) : (
                 <div className="p-8 text-center text-slate-500">
                   <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                  <p>No results found for "{query}"</p>
+                  <p>{t('landing.noResults')} "{query}"</p>
                 </div>
               )}
             </div>
@@ -128,7 +144,7 @@ export function LandingPage({ onSearch }: LandingPageProps) {
           <span className="flex items-center text-slate-500 font-medium">
             <TrendingUp className="w-4 h-4 mr-1.5" /> Popular:
           </span>
-          {['Salmon', 'Chicken Breast', 'Organic Lettuce', 'Milk'].map(term => (
+          {popularSearches.map(term => (
             <button
               key={term}
               onClick={() => onSearch(term)}

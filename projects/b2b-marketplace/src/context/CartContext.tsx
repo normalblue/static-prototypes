@@ -1,27 +1,40 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { Product } from '../data/mockData';
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
 
 interface CartContextType {
+  cartItems: CartItem[];
   cartCount: number;
-  addToCart: (event: React.MouseEvent<HTMLButtonElement>, productImage: string) => void;
+  addToCart: (event: React.MouseEvent<HTMLButtonElement>, product: Product) => void;
   isAnimating: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cartCount, setCartCount] = useState(0);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const addToCart = (_e: React.MouseEvent<HTMLButtonElement>, _img: string) => {
-    // In a real app, we'd animate a clone of the image flying to the cart.
-    // For this prototype, we'll trigger a bounce animation on the cart icon.
-    setCartCount(prev => prev + 1);
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  const addToCart = (_e: React.MouseEvent<HTMLButtonElement>, product: Product) => {
+    setCartItems(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      if (existing) {
+        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+      }
+      return [...prev, { product, quantity: 1 }];
+    });
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 500); // Reset animation state
+    setTimeout(() => setIsAnimating(false), 500);
   };
 
   return (
-    <CartContext.Provider value={{ cartCount, addToCart, isAnimating }}>
+    <CartContext.Provider value={{ cartItems, cartCount, addToCart, isAnimating }}>
       {children}
     </CartContext.Provider>
   );

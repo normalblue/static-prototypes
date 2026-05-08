@@ -20,6 +20,10 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+  };
+
   return (
     <CartProvider>
       <div className="font-sans antialiased text-slate-900 bg-white">
@@ -33,7 +37,7 @@ function App() {
           {currentPage === 'landing' ? (
             <LandingPage onSearch={handleSearch} />
           ) : (
-            <SearchPage initialQuery={searchQuery} />
+            <SearchPage initialQuery={searchQuery} onClearSearch={handleClearSearch} />
           )}
         </main>
       </div>
