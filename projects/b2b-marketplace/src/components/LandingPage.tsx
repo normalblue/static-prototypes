@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ArrowRight, TrendingUp } from 'lucide-react';
+import { Search, ArrowRight, TrendingUp, ShoppingCart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { MOCK_PRODUCTS } from '../data/mockData';
 import { ProductCard } from './ProductCard';
 import { useTranslation } from 'react-i18next';
+import { useCart } from '../context/CartContext';
 
 interface LandingPageProps {
   onSearch: (query: string) => void;
@@ -15,6 +17,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t, i18n } = useTranslation();
+  const { addToCart } = useCart();
   
   const isThai = i18n.language === 'th';
   const showSearchState = isFocused || query.length > 0;
@@ -102,11 +105,30 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
                       {filteredProducts.map(product => {
                         const name = isThai ? product.nameTh : product.nameEn;
                         return (
-                          <li key={product.id}>
-                            <button
-                              type="button"
-                              onClick={() => onNavigateProduct(product.id)}
-                              className="w-full text-left flex items-center p-3 hover:bg-brand-50 rounded-xl transition-colors group"
+                          <li key={product.id} className="relative overflow-hidden rounded-xl mb-1 last:mb-0 bg-brand-500">
+                            {/* Background revealed on swipe */}
+                            <div className="absolute inset-0 flex items-center px-4 text-white font-bold">
+                              <div className="flex items-center gap-2">
+                                <ShoppingCart className="w-5 h-5" />
+                                <span className="text-sm">{t('header.addedToCart')}</span>
+                              </div>
+                            </div>
+
+                            <motion.div
+                              drag="x"
+                              dragConstraints={{ left: 0, right: 0 }}
+                              dragElastic={0.7}
+                              onDragEnd={(_, info) => {
+                                if (info.offset.x > 80) {
+                                  addToCart(null as any, product);
+                                }
+                              }}
+                              className="relative w-full text-left flex items-center p-3 bg-white hover:bg-brand-50 transition-colors group cursor-pointer"
+                              onClick={(e) => {
+                                // Prevent navigation if it was a drag
+                                if (Math.abs((e as any).movementX || 0) > 5) return;
+                                onNavigateProduct(product.id);
+                              }}
                             >
                               <img src={product.image} alt={name} className="w-10 h-10 rounded-lg object-cover bg-slate-100" />
                               <div className="ml-3 flex-1 overflow-hidden">
@@ -114,7 +136,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
                                 <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
                               </div>
                               <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
-                            </button>
+                            </motion.div>
                           </li>
                         )
                       })}

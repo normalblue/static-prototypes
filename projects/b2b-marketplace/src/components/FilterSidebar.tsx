@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { CATEGORIES_EN, CATEGORIES_TH, ATTRIBUTES_EN, ATTRIBUTES_TH, DELIVERY_OPTIONS_EN, DELIVERY_OPTIONS_TH } from '../data/mockData';
 import { FilterState } from './SearchPage';
@@ -12,10 +12,46 @@ interface FilterSidebarProps {
   inSheet?: boolean;
 }
 
+interface AccordionProps {
+  title: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+function Accordion({ title, isOpen, onToggle, children }: AccordionProps) {
+  return (
+    <div className="border-b border-slate-100 py-4">
+      <button 
+        className="flex items-center justify-between w-full text-left font-semibold text-slate-800"
+        onClick={onToggle}
+      >
+        <span>{title}</span>
+        {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
+      {isOpen && (
+        <div className="mt-3 animate-in fade-in slide-in-from-top-1">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = false }: FilterSidebarProps) {
   const { t, i18n } = useTranslation();
   const isThai = i18n.language === 'th';
   
+  // Local draft for the price slider — shows live value while dragging
+  // but only commits to filters on pointer/touch release to prevent 
+  // excessive re-rendering of the entire product grid.
+  const [draftPrice, setDraftPrice] = useState<number>(filters.maxPrice);
+
+  // Keep draft in sync when filters are reset externally (e.g. "Clear all")
+  useEffect(() => {
+    setDraftPrice(filters.maxPrice);
+  }, [filters.maxPrice]);
+
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     Category: true,
     Attributes: true,
@@ -70,23 +106,6 @@ export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = fa
     onClearSearch();
   };
 
-  const Accordion = ({ id, title, children }: { id: string, title: string, children: React.ReactNode }) => (
-    <div className="border-b border-slate-100 py-4">
-      <button 
-        className="flex items-center justify-between w-full text-left font-semibold text-slate-800"
-        onClick={() => toggleSection(id)}
-      >
-        <span>{title}</span>
-        {openSections[id] ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-      </button>
-      {openSections[id] && (
-        <div className="mt-3 animate-in fade-in slide-in-from-top-1">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className={inSheet ? 'w-full' : 'w-64 flex-shrink-0 pr-6'}>
       <div className={inSheet ? '' : 'sticky top-24 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm'}>
@@ -97,7 +116,7 @@ export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = fa
           </div>
         )}
 
-        <Accordion id="Category" title={t('filters.category')}>
+        <Accordion title={t('filters.category')} isOpen={openSections['Category']} onToggle={() => toggleSection('Category')}>
           <div className="space-y-2">
             {CATEGORIES.map(category => {
               const isAll = category === CATEGORIES_EN[0] || category === CATEGORIES_TH[0];
@@ -120,7 +139,7 @@ export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = fa
           </div>
         </Accordion>
 
-        <Accordion id="Attributes" title={t('filters.attributes')}>
+        <Accordion title={t('filters.attributes')} isOpen={openSections['Attributes']} onToggle={() => toggleSection('Attributes')}>
           <div className="space-y-2">
             {ATTRIBUTES.map(attr => {
               const isChecked = filters.attributes.includes(attr);
@@ -142,19 +161,30 @@ export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = fa
           </div>
         </Accordion>
 
-        <Accordion id="Price" title={t('filters.price')}>
+        <Accordion title={t('filters.price')} isOpen={openSections['Price']} onToggle={() => toggleSection('Price')}>
           <div className="px-1 py-2">
+            {/* Live price label */}
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-slate-700">{t('filters.upTo')} ฿{filters.maxPrice}</span>
+              <span className="text-sm font-medium text-slate-700">
+                {t('filters.upTo')}&nbsp;
+                <span className="text-brand-600 font-semibold">฿{draftPrice.toLocaleString()}</span>
+              </span>
             </div>
-            <input 
-              type="range" 
-              min="0" 
-              max="5000" 
-              step="50"
-              value={filters.maxPrice}
-              onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: parseInt(e.target.value) }))}
-              className="w-full accent-brand-500" 
+
+            {/* Range input — local draft updates on drag, filter commits on release */}
+            <input
+              type="range"
+              min={0}
+              max={5000}
+              step={50}
+              value={draftPrice}
+              onChange={(e) => setDraftPrice(parseInt(e.target.value))}
+              onMouseUp={() => setFilters(prev => ({ ...prev, maxPrice: draftPrice }))}
+              onTouchEnd={() => setFilters(prev => ({ ...prev, maxPrice: draftPrice }))}
+              className="w-full h-2 rounded-full appearance-none cursor-grab active:cursor-grabbing outline-none bg-slate-200"
+              style={{
+                background: `linear-gradient(to right, var(--color-brand-500, #22c55e) 0%, var(--color-brand-500, #22c55e) ${(draftPrice / 5000) * 100}%, transparent ${(draftPrice / 5000) * 100}%, transparent 100%)`,
+              }}
             />
             <div className="flex justify-between text-xs text-slate-500 mt-2">
               <span>฿0</span>
@@ -163,7 +193,7 @@ export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = fa
           </div>
         </Accordion>
 
-        <Accordion id="Delivery" title={t('filters.delivery')}>
+        <Accordion title={t('filters.delivery')} isOpen={openSections['Delivery']} onToggle={() => toggleSection('Delivery')}>
           <div className="space-y-2">
             <label className="flex items-center group cursor-pointer">
               <div className={`relative flex items-center justify-center w-5 h-5 mr-3 border rounded-full transition-colors ${filters.delivery === null ? 'bg-white border-brand-500' : 'bg-white border-slate-300 group-hover:border-brand-500'}`}>
@@ -199,7 +229,7 @@ export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = fa
           </div>
         </Accordion>
 
-        <Accordion id="Stock" title={t('filters.stockStatus')}>
+        <Accordion title={t('filters.stockStatus')} isOpen={openSections['Stock']} onToggle={() => toggleSection('Stock')}>
           <label className="flex items-center group cursor-pointer mt-1">
             <div className={`relative flex items-center justify-center w-10 h-5 mr-3 rounded-full transition-colors ${filters.inStockOnly ? 'bg-brand-500' : 'bg-slate-200'}`}>
               <input 
