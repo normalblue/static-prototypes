@@ -9,7 +9,7 @@ export interface CartItem {
 interface CartContextType {
   cartItems: CartItem[];
   cartCount: number;
-  addToCart: (event: React.MouseEvent<HTMLButtonElement>, product: Product) => void;
+  addToCart: (event: React.MouseEvent<HTMLButtonElement>, product: Product, quantity?: number) => void;
   isAnimating: boolean;
 }
 
@@ -21,13 +21,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const addToCart = (_e: React.MouseEvent<HTMLButtonElement>, product: Product) => {
+  const addToCart = (_e: React.MouseEvent<HTMLButtonElement>, product: Product, quantity: number = 1) => {
     setCartItems(prev => {
       const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
-        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity }];
     });
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 500);

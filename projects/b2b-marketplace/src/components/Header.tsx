@@ -7,11 +7,12 @@ import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
-  currentPage: 'landing' | 'search';
+  currentPage: 'landing' | 'search' | 'product';
   onNavigateHome: () => void;
+  onNavigateProduct: (id: string) => void;
 }
 
-export function Header({ onSearch, currentPage, onNavigateHome }: HeaderProps) {
+export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduct }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [query, setQuery] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -109,9 +110,8 @@ export function Header({ onSearch, currentPage, onNavigateHome }: HeaderProps) {
                           key={product.id} 
                           className="flex items-center p-3 hover:bg-brand-50 rounded-xl cursor-pointer transition-colors"
                           onClick={() => {
-                            setQuery(name);
                             setShowAutocomplete(false);
-                            onSearch(name);
+                            onNavigateProduct(product.id);
                           }}
                         >
                           <img src={product.image} alt={name} className="w-10 h-10 rounded-lg object-cover mr-4" />
