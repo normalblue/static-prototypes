@@ -64,23 +64,25 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || currentPage === 'search' ? 'bg-white shadow-sm' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          
+
+        {/* Top row: logo / search (sm+) / cart */}
+        <div className="flex justify-between items-center h-14 sm:h-20">
+
           {/* Logo */}
-          <div className="flex items-center cursor-pointer" onClick={onNavigateHome}>
-            <Menu className="h-6 w-6 text-slate-500 mr-4 lg:hidden" />
+          <div className="flex items-center cursor-pointer flex-shrink-0" onClick={onNavigateHome}>
+            <Menu className="h-6 w-6 text-slate-500 mr-3 lg:hidden" />
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">F</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-brand-500 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg sm:text-xl">F</span>
               </div>
-              <span className="text-2xl font-bold text-slate-900 hidden sm:block">{t('header.brand')}</span>
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 hidden sm:block">{t('header.brand')}</span>
             </div>
           </div>
 
-          {/* Search Bar - Only show in Header if on Search Page */}
+          {/* Search Bar — inline on sm+ only */}
           {currentPage === 'search' && (
-            <div className="flex-1 max-w-3xl mx-8 relative" ref={autocompleteRef}>
-              <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <div className="hidden sm:flex flex-1 max-w-3xl mx-6 lg:mx-8 relative" ref={autocompleteRef}>
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
                 <input
                   type="text"
                   placeholder={t('header.searchPlaceholder')}
@@ -98,7 +100,7 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
                 </button>
               </form>
 
-              {/* Autocomplete Dropdown */}
+              {/* Desktop Autocomplete */}
               {showAutocomplete && query && (
                 <div className="absolute top-14 left-0 right-0 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
                   <div className="p-2">
@@ -149,10 +151,10 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
           )}
 
           {/* Cart & Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button 
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors border border-slate-200"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors border border-slate-200"
             >
               <Globe className="w-4 h-4" />
               <span>{isThai ? 'TH' : 'EN'}</span>
@@ -165,7 +167,7 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
             
             <div className="relative group">
               <motion.button 
-                className="relative flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-sm border border-slate-200 hover:border-brand-300 transition-colors cursor-pointer"
+                className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-sm border border-slate-200 hover:border-brand-300 transition-colors cursor-pointer"
                 animate={isAnimating ? { scale: [1, 1.2, 0.9, 1.1, 1] } : {}}
                 transition={{ duration: 0.5 }}
               >
@@ -215,11 +217,63 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
                 )}
               </div>
             </div>
-            <div className="w-10 h-10 bg-slate-200 rounded-full border border-slate-300 overflow-hidden cursor-pointer">
+
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-200 rounded-full border border-slate-300 overflow-hidden cursor-pointer">
               <img src="https://ui-avatars.com/api/?name=User&background=f8fafc&color=0f172a" alt="User" />
             </div>
           </div>
         </div>
+
+        {/* Mobile search row — second row, only on search page, only on xs (<sm) */}
+        {currentPage === 'search' && (
+          <div className="sm:hidden pb-2 relative" ref={autocompleteRef}>
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+              <input
+                type="text"
+                placeholder={t('header.searchPlaceholder')}
+                className="w-full h-10 pl-9 pr-20 rounded-full border border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-100 transition-all outline-none text-sm"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowAutocomplete(true);
+                }}
+                onFocus={() => setShowAutocomplete(true)}
+              />
+              <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+              <button type="submit" className="absolute right-1.5 bg-brand-500 hover:bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-medium transition-colors">
+                {t('header.search')}
+              </button>
+            </form>
+
+            {/* Mobile Autocomplete Dropdown */}
+            {showAutocomplete && query && (
+              <div className="absolute left-0 right-0 top-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-y-auto max-h-[55vh] z-50">
+                <div className="p-2">
+                  {filteredProducts.slice(0, 8).map(product => {
+                    const name = isThai ? product.nameTh : product.nameEn;
+                    return (
+                      <div 
+                        key={product.id} 
+                        className="flex items-center p-2.5 hover:bg-brand-50 rounded-xl cursor-pointer transition-colors"
+                        onClick={() => {
+                          setShowAutocomplete(false);
+                          onNavigateProduct(product.id);
+                        }}
+                      >
+                        <img src={product.image} alt={name} className="w-9 h-9 rounded-lg object-cover mr-3 flex-shrink-0" />
+                        <div className="flex-1 overflow-hidden">
+                          <h4 className="text-sm font-medium text-slate-900 truncate">{name}</h4>
+                          <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
+                        </div>
+                        <p className="text-sm font-semibold text-brand-600 ml-2 flex-shrink-0">฿{product.price.toFixed(0)}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

@@ -8,9 +8,11 @@ interface FilterSidebarProps {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   onClearSearch: () => void;
+  /** When true, renders without outer fixed-width wrapper (for use in bottom sheet) */
+  inSheet?: boolean;
 }
 
-export function FilterSidebar({ filters, setFilters, onClearSearch }: FilterSidebarProps) {
+export function FilterSidebar({ filters, setFilters, onClearSearch, inSheet = false }: FilterSidebarProps) {
   const { t, i18n } = useTranslation();
   const isThai = i18n.language === 'th';
   
@@ -86,12 +88,14 @@ export function FilterSidebar({ filters, setFilters, onClearSearch }: FilterSide
   );
 
   return (
-    <div className="w-64 flex-shrink-0 pr-6">
-      <div className="sticky top-24 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold text-slate-900">{t('filters.filters')}</h2>
-          <button onClick={clearAll} className="text-xs font-medium text-brand-600 hover:text-brand-700">{t('filters.clearAll')}</button>
-        </div>
+    <div className={inSheet ? 'w-full' : 'w-64 flex-shrink-0 pr-6'}>
+      <div className={inSheet ? '' : 'sticky top-24 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm'}>
+        {!inSheet && (
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold text-slate-900">{t('filters.filters')}</h2>
+            <button onClick={clearAll} className="text-xs font-medium text-brand-600 hover:text-brand-700">{t('filters.clearAll')}</button>
+          </div>
+        )}
 
         <Accordion id="Category" title={t('filters.category')}>
           <div className="space-y-2">
