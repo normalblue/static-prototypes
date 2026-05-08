@@ -17,6 +17,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
   const { t, i18n } = useTranslation();
   
   const isThai = i18n.language === 'th';
+  const showSearchState = isFocused || query.length > 0;
 
   const filteredProducts = query 
     ? MOCK_PRODUCTS.filter(p => 
@@ -50,15 +51,17 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
     : ['Salmon', 'Chicken Breast', 'Organic Lettuce', 'Milk'];
 
   return (
-    <div className="min-h-screen pt-20 flex flex-col items-center">
+    <div className="min-h-screen pt-10 md:pt-20 flex flex-col items-center">
       {/* Hero Section */}
-      <div className="w-full max-w-4xl mx-auto px-4 mt-20 text-center relative z-10">
-        <h1 className="text-4xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6">
-          {t('landing.title')}
-        </h1>
-        <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-          {t('landing.subtitle')}
-        </p>
+      <div className={`w-full max-w-4xl mx-auto px-4 transition-all duration-500 ease-in-out ${showSearchState ? 'mt-4 md:mt-20' : 'mt-20 md:mt-20'} text-center relative z-10`}>
+        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showSearchState ? 'max-h-0 opacity-0 mb-0 md:max-h-64 md:opacity-100 md:mb-10' : 'max-h-64 opacity-100 mb-10'}`}>
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6">
+            {t('landing.title')}
+          </h1>
+          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">
+            {t('landing.subtitle')}
+          </p>
+        </div>
 
         {/* Big Search Bar */}
         <div className="relative w-full max-w-3xl mx-auto">
@@ -70,7 +73,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
             <input
               ref={inputRef}
               type="text"
-              className="w-full h-16 md:h-20 pl-16 pr-32 text-lg md:text-xl text-slate-900 bg-transparent outline-none rounded-2xl placeholder:text-slate-400"
+              className="w-full h-14 md:h-20 pl-16 pr-32 text-lg md:text-xl text-slate-900 bg-transparent outline-none rounded-2xl placeholder:text-slate-400"
               placeholder={t('header.searchPlaceholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -78,7 +81,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
             />
             <button 
               type="submit"
-              className="absolute right-3 top-3 bottom-3 bg-brand-500 hover:bg-brand-600 text-white px-6 rounded-xl font-semibold text-lg transition-colors flex items-center shadow-sm"
+              className="absolute right-3 top-2 bottom-2 md:top-3 md:bottom-3 bg-brand-500 hover:bg-brand-600 text-white px-6 rounded-xl font-semibold transition-colors flex items-center shadow-sm"
             >
               {t('header.search')}
             </button>
@@ -88,15 +91,15 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
           {isFocused && query && (
             <div 
               ref={dropdownRef}
-              className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden text-left animate-in fade-in slide-in-from-top-2 duration-200"
+              className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-2xl border border-slate-100 text-left animate-in fade-in slide-in-from-top-2 duration-200 max-h-[60vh] overflow-y-auto"
             >
               {filteredProducts.length > 0 ? (
                 <div className="flex flex-col md:flex-row">
                   {/* Section A: Text Suggestions */}
-                  <div className="md:w-1/2 p-2 border-b md:border-b-0 md:border-r border-slate-100">
+                  <div className="w-full md:w-1/2 p-2 border-b md:border-b-0 md:border-r border-slate-100">
                     <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">Suggestions</h3>
                     <ul>
-                      {filteredProducts.slice(0, 5).map(product => {
+                      {filteredProducts.map(product => {
                         const name = isThai ? product.nameTh : product.nameEn;
                         return (
                           <li key={product.id}>
@@ -119,7 +122,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
                   </div>
 
                   {/* Section B: Visual Cards */}
-                  <div className="md:w-1/2 p-4 bg-slate-50/50">
+                  <div className="hidden md:block md:w-1/2 p-4 bg-slate-50/50">
                     <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{t('landing.topProducts')}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
                       {filteredProducts.slice(0, 2).map(product => (
@@ -141,7 +144,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
         </div>
 
         {/* Popular Searches */}
-        <div className="mt-8 flex flex-wrap justify-center items-center gap-3 text-sm">
+        <div className={`mt-8 flex flex-wrap justify-center items-center gap-3 text-sm transition-opacity duration-300 ${showSearchState ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
           <span className="flex items-center text-slate-500 font-medium">
             <TrendingUp className="w-4 h-4 mr-1.5" /> Popular:
           </span>
