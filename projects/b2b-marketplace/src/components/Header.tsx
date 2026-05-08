@@ -16,7 +16,7 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
   const [isScrolled, setIsScrolled] = useState(false);
   const [query, setQuery] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const { cartCount, cartItems, isAnimating } = useCart();
+  const { cartCount, cartItems, isAnimating, addToCart } = useCart();
   const autocompleteRef = useRef<HTMLDivElement>(null);
   const { t, i18n } = useTranslation();
 
@@ -119,9 +119,25 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
                             <h4 className="text-sm font-medium text-slate-900">{name}</h4>
                             <p className="text-xs text-slate-500">{product.supplier}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm font-semibold text-brand-600">฿{product.price.toFixed(2)}</p>
-                            <p className="text-xs text-slate-400">/ {unit}</p>
+                          <div className="text-right flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-brand-600">฿{product.price.toFixed(2)}</p>
+                              <p className="text-xs text-slate-400">/ {unit}</p>
+                            </div>
+                            <button 
+                              disabled={!product.inStock}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCart(e as unknown as React.MouseEvent<HTMLButtonElement>, product);
+                              }}
+                              className={`p-2 rounded-lg transition-colors ${
+                                product.inStock 
+                                  ? 'bg-brand-50 text-brand-600 hover:bg-brand-500 hover:text-white' 
+                                  : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                              }`}
+                            >
+                              <ShoppingCart className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       )
