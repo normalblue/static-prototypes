@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 interface SearchPageProps {
   initialQuery: string;
   onClearSearch: () => void;
+  onNavigateProduct: (id: string) => void;
 }
 
 export interface FilterState {
@@ -18,7 +19,7 @@ export interface FilterState {
   inStockOnly: boolean;
 }
 
-export function SearchPage({ initialQuery, onClearSearch }: SearchPageProps) {
+export function SearchPage({ initialQuery, onClearSearch, onNavigateProduct }: SearchPageProps) {
   const { t } = useTranslation();
   
   const [filters, setFilters] = useState<FilterState>({
@@ -186,7 +187,7 @@ export function SearchPage({ initialQuery, onClearSearch }: SearchPageProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {results.length > 0 ? (
                 results.map(product => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} onClick={() => onNavigateProduct(product.id)} />
                 ))
               ) : (
                 <div className="col-span-full py-20 text-center">

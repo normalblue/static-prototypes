@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 
 interface LandingPageProps {
   onSearch: (query: string) => void;
+  onNavigateProduct: (id: string) => void;
 }
 
-export function LandingPage({ onSearch }: LandingPageProps) {
+export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -101,7 +102,7 @@ export function LandingPage({ onSearch }: LandingPageProps) {
                           <li key={product.id}>
                             <button
                               type="button"
-                              onClick={() => onSearch(name)}
+                              onClick={() => onNavigateProduct(product.id)}
                               className="w-full text-left flex items-center p-3 hover:bg-brand-50 rounded-xl transition-colors group"
                             >
                               <img src={product.image} alt={name} className="w-10 h-10 rounded-lg object-cover bg-slate-100" />
@@ -123,7 +124,7 @@ export function LandingPage({ onSearch }: LandingPageProps) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
                       {filteredProducts.slice(0, 2).map(product => (
                         <div key={`visual-${product.id}`} className="w-full">
-                          <ProductCard product={product} compact />
+                          <ProductCard product={product} compact onClick={() => onNavigateProduct(product.id)} />
                         </div>
                       ))}
                     </div>

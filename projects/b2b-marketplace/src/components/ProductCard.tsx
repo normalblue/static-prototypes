@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 interface ProductCardProps {
   product: Product;
   compact?: boolean;
+  onClick?: () => void;
 }
 
-export function ProductCard({ product, compact = false }: ProductCardProps) {
+export function ProductCard({ product, compact = false, onClick }: ProductCardProps) {
   const { addToCart } = useCart();
   const { t, i18n } = useTranslation();
   
@@ -20,7 +21,10 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
 
   if (compact) {
     return (
-      <div className="flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow p-3 w-full cursor-pointer group">
+      <div 
+        onClick={onClick}
+        className="flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow p-3 w-full cursor-pointer group"
+      >
         <div className="relative h-24 mb-3 overflow-hidden rounded-lg bg-slate-50">
           <img src={product.image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         </div>
@@ -49,7 +53,10 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
   }
 
   return (
-    <div className="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer relative">
+    <div 
+      onClick={onClick}
+      className="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group cursor-pointer relative"
+    >
       {product.promotion && (
         <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-md z-10">
           {product.promotion}
