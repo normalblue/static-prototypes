@@ -127,6 +127,7 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
                               onClick={(e) => {
                                 // Prevent navigation if it was a drag
                                 if (Math.abs((e as any).movementX || 0) > 5) return;
+                                setIsFocused(false);
                                 onNavigateProduct(product.id);
                               }}
                             >
@@ -135,6 +136,18 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
                                 <p className="text-sm font-medium text-slate-900 truncate group-hover:text-brand-700">{name}</p>
                                 <p className="text-xs text-slate-500 truncate">{product.supplier}</p>
                               </div>
+                              
+                              {/* Desktop Add to Cart Button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToCart(e as any, product);
+                                }}
+                                className="hidden md:flex items-center justify-center p-2 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-500 hover:text-white transition-colors mr-2"
+                              >
+                                <ShoppingCart className="w-4 h-4" />
+                              </button>
+
                               <ArrowRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
                             </motion.div>
                           </li>

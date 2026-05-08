@@ -17,7 +17,10 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
   const [query, setQuery] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const { cartCount, cartItems, isAnimating, addToCart } = useCart();
-  const autocompleteRef = useRef<HTMLDivElement>(null);
+  const desktopSearchRef = useRef<HTMLDivElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const cartRef = useRef<HTMLDivElement>(null);
+  const [showCart, setShowCart] = useState(false);
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -30,8 +33,16 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target as Node)) {
+      const isInsideDesktop = desktopSearchRef.current?.contains(event.target as Node);
+      const isInsideMobile = mobileSearchRef.current?.contains(event.target as Node);
+      const isInsideCart = cartRef.current?.contains(event.target as Node);
+      
+      if (!isInsideDesktop && !isInsideMobile) {
         setShowAutocomplete(false);
+      }
+
+      if (!isInsideCart) {
+        setShowCart(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -81,7 +92,7 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
 
           {/* Search Bar — inline on sm+ only */}
           {currentPage === 'search' && (
-            <div className="hidden sm:flex flex-1 max-w-3xl mx-6 lg:mx-8 relative" ref={autocompleteRef}>
+            <div className="hidden sm:flex flex-1 max-w-3xl mx-6 lg:mx-8 relative" ref={desktopSearchRef}>
               <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
                 <input
                   type="text"
@@ -167,8 +178,9 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
               {t('header.advancedSearch')}
             </button>
             
-            <div className="relative group">
+            <div className="relative group" ref={cartRef}>
               <motion.button 
+                onClick={() => setShowCart(!showCart)}
                 className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full shadow-sm border border-slate-200 hover:border-brand-300 transition-colors cursor-pointer"
                 animate={isAnimating ? { scale: [1, 1.2, 0.9, 1.1, 1] } : {}}
                 transition={{ duration: 0.5 }}
@@ -181,8 +193,8 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
                 )}
               </motion.button>
 
-              {/* Cart Hover Dropdown */}
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              {/* Cart Dropdown — state-controlled for mobile toggle + hover support */}
+              <div className={`fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-16 sm:top-full mt-2 sm:w-80 bg-white rounded-2xl shadow-xl border border-slate-100 transition-all duration-200 z-50 ${showCart ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
                 <div className="p-4 border-b border-slate-50">
                   <h3 className="font-semibold text-slate-900">{t('header.yourCart')}</h3>
                   <p className="text-xs text-slate-500">{cartCount} {t('header.items')}</p>
@@ -228,7 +240,7 @@ export function Header({ onSearch, currentPage, onNavigateHome, onNavigateProduc
 
         {/* Mobile search row — second row, only on search page, only on xs (<sm) */}
         {currentPage === 'search' && (
-          <div className="sm:hidden pb-2 relative" ref={autocompleteRef}>
+          <div className="sm:hidden pb-2 relative" ref={mobileSearchRef}>
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
