@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ArrowRight, TrendingUp, ShoppingCart } from 'lucide-react';
+import { Search, ArrowRight, TrendingUp, ShoppingCart, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MOCK_PRODUCTS } from '../data/mockData';
 import { ProductCard } from './ProductCard';
@@ -49,6 +49,17 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
     }
   };
 
+  const clearSearch = () => {
+    setQuery('');
+    setIsFocused(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      clearSearch();
+    }
+  };
+
   const popularSearches = isThai 
     ? ['แซลมอน', 'อกไก่', 'ผักกาดออร์แกนิค', 'นม']
     : ['Salmon', 'Chicken Breast', 'Organic Lettuce', 'Milk'];
@@ -79,15 +90,31 @@ export function LandingPage({ onSearch, onNavigateProduct }: LandingPageProps) {
               className="w-full h-14 md:h-20 pl-16 pr-32 text-lg md:text-xl text-slate-900 bg-transparent outline-none rounded-2xl placeholder:text-slate-400"
               placeholder={t('header.searchPlaceholder')}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setIsFocused(true);
+              }}
               onFocus={() => setIsFocused(true)}
+              onKeyDown={handleKeyDown}
             />
-            <button 
-              type="submit"
-              className="absolute right-3 top-2 bottom-2 md:top-3 md:bottom-3 bg-brand-500 hover:bg-brand-600 text-white px-6 rounded-xl font-semibold transition-colors flex items-center shadow-sm"
-            >
-              {t('header.search')}
-            </button>
+            <div className="absolute right-3 flex items-center gap-2">
+              {query && (
+                <button 
+                  type="button" 
+                  onClick={clearSearch}
+                  className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="h-5 w-5 md:h-6 md:w-6" />
+                </button>
+              )}
+              <button 
+                type="submit"
+                className="h-10 md:h-14 bg-brand-500 hover:bg-brand-600 text-white w-10 md:w-auto px-0 md:px-6 rounded-xl font-semibold transition-colors flex items-center justify-center shadow-sm"
+              >
+                <Search className="h-5 w-5 md:hidden" />
+                <span className="hidden md:inline">{t('header.search')}</span>
+              </button>
+            </div>
           </form>
 
           {/* Autocomplete Dropdown */}
