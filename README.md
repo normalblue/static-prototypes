@@ -31,4 +31,4 @@ This repository serves as a showcase for high-fidelity frontend prototypes. Each
 
 ---
 
-*Developed by [Ekapol](https://github.com/normalblue)*
+*Developed by [Kris](https://github.com/normalblue)*
